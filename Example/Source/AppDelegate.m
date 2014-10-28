@@ -37,6 +37,7 @@
     
     NFSplitViewController* sp2 = [[NFSplitViewController alloc] init];
     sp2.vertical = YES;
+    sp2.dividerThickness = 1;
     
     TestViewController* vc2 = [[TestViewController alloc] init];
     vc2.backgroundColor = [NSColor whiteColor];

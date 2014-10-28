@@ -15,6 +15,7 @@
 @property (nonatomic,strong) NSMutableIndexSet* collapsedIndexes;
 @property (nonatomic,weak) NFSplitViewController* controller;
 @property (nonatomic,getter=isVertical) BOOL vertical;
+@property (nonatomic,assign) CGFloat dividerThickness;
 
 @end
 
@@ -81,6 +82,7 @@
 - (id)initWithFrame:(NSRect)frameRect
 {
     self = [super initWithFrame:frameRect];
+    _dividerThickness = 1;
     _collapsedIndexes = [NSMutableIndexSet indexSet];
     return self;
 }
@@ -95,11 +97,11 @@
     
     if ( self.vertical )
     {
-        return CGRectMake( 0, CGRectGetMaxY(vc1.view.frame)-2, self.bounds.size.width, [NFSplitViewController dividerThickness]+4 );
+        return CGRectMake( 0, CGRectGetMaxY(vc1.view.frame)-2, self.bounds.size.width, self.dividerThickness+4 );
     }
     else
     {
-        return CGRectMake( CGRectGetMaxX(vc1.view.frame)-2, 0, [NFSplitViewController dividerThickness]+4, self.bounds.size.height );
+        return CGRectMake( CGRectGetMaxX(vc1.view.frame)-2, 0, self.dividerThickness+4, self.bounds.size.height );
     }
     
     return CGRectZero;
@@ -183,10 +185,20 @@
     [self addCursorRect: [self _splitterRect] cursor:cursor];
 }
 
+- (void)setDividerThickness:(CGFloat)dividerThickness
+{
+    _dividerThickness = dividerThickness;
+    [self setNeedsLayout:YES];
+    [self layoutSubtreeIfNeeded];
+    [self.window invalidateCursorRectsForView:self];
+    
+}
+
 - (void)setVertical:(BOOL)vertical
 {
     _vertical = vertical;
     [self setNeedsLayout:YES];
+    [self layoutSubtreeIfNeeded];
     [self.window invalidateCursorRectsForView:self];
 }
 
@@ -250,19 +262,19 @@
     frame1.origin.x = 0;
     frame1.origin.y = 0;
     frame1.size.width = self.bounds.size.width;
-    if ( frame1.size.height > self.bounds.size.height - [NFSplitViewController dividerThickness] )
-        frame1.size.height = self.bounds.size.height - [NFSplitViewController dividerThickness];
+    if ( frame1.size.height > self.bounds.size.height - self.dividerThickness )
+        frame1.size.height = self.bounds.size.height - self.dividerThickness;
     
     if ( vc2IsCollapsed )
         frame1.size.height = self.bounds.size.height;
     else if ( resetBasedOnVC2 && !vc1IsCollapsed )
     {
-        frame1.size.height = self.bounds.size.height - [NFSplitViewController dividerThickness] - self.vc2SizeBeforeCollpase;
+        frame1.size.height = self.bounds.size.height - self.dividerThickness - self.vc2SizeBeforeCollpase;
     }
     
     // setup frame 2
     frame2.origin.x = 0;
-    frame2.origin.y = vc1IsCollapsed ? 0 : CGRectGetMaxY(frame1) + [NFSplitViewController dividerThickness];
+    frame2.origin.y = vc1IsCollapsed ? 0 : CGRectGetMaxY(frame1) + self.dividerThickness;
     frame2.size.height = vc1IsCollapsed ? self.bounds.size.height : self.bounds.size.height - CGRectGetMinY(frame2);
     frame2.size.width = self.bounds.size.width;
     
@@ -312,18 +324,18 @@
     frame1.origin.x = 0;
     frame1.origin.y = 0;
     frame1.size.height = self.bounds.size.height;
-    if ( frame1.size.width > self.bounds.size.width - [NFSplitViewController dividerThickness] )
-        frame1.size.width = self.bounds.size.width - [NFSplitViewController dividerThickness];
+    if ( frame1.size.width > self.bounds.size.width - self.dividerThickness )
+        frame1.size.width = self.bounds.size.width - self.dividerThickness;
     
     if ( vc2IsCollapsed )
         frame1.size.width = self.bounds.size.width;
     else if ( resetBasedOnVC2 && !vc1IsCollapsed )
     {
-        frame1.size.width = self.bounds.size.width - [NFSplitViewController dividerThickness] - self.vc2SizeBeforeCollpase;
+        frame1.size.width = self.bounds.size.width - self.dividerThickness - self.vc2SizeBeforeCollpase;
     }
     
     // setup frame 2
-    frame2.origin.x = vc1IsCollapsed ? 0 : CGRectGetMaxX(frame1) + [NFSplitViewController dividerThickness];
+    frame2.origin.x = vc1IsCollapsed ? 0 : CGRectGetMaxX(frame1) + self.dividerThickness;
     frame2.origin.y = 0;
     frame2.size.width = vc1IsCollapsed ? self.bounds.size.width : self.bounds.size.width - CGRectGetMinX(frame2);
     frame2.size.height = self.bounds.size.height;
@@ -496,16 +508,28 @@
         [self.splitView addSubview:cntlr.view];
 }
 
-- (void)setSplitterColor:(NSColor *)splitterColor
+- (void)setDividerColor:(NSColor *)dividerColor
 {
     (void)self.view;
-    self.splitView.backgroundColor = splitterColor;
+    self.splitView.backgroundColor = dividerColor;
 }
 
-- (NSColor*)splitterColor
+- (NSColor*)dividerColor
 {
     (void)self.view;
     return self.splitView.backgroundColor;
+}
+
+- (void)setDividerThickness:(CGFloat)dividerThickness
+{
+    (void)self.view;
+    self.splitView.dividerThickness = dividerThickness;
+}
+
+- (CGFloat)dividerThickness
+{
+    (void)self.view;
+    return self.splitView.dividerThickness;
 }
 
 - (void)collapseViewControllerAtIndex:(NSUInteger)index animated:(BOOL)animated completion:(void (^)(void))completion
