@@ -110,22 +110,23 @@
             case NSLeftMouseDragged:
             {
                 locationInView = [self convertPoint:theEvent.locationInWindow fromView:nil];
-                NSView* v = [self.controller.childViewControllers[0] view];
+                NSViewController*   vc = self.controller.childViewControllers[0];
+                CGFloat             min1 = [vc minimumLengthInSplitViewController:self.controller];
+                CGFloat             max1 = [vc maximumLengthInSplitViewController:self.controller];
+                NSView*             v = vc.view;
                 CGRect r = v.frame;
                 if ( self.vertical )
-                    r.size.height = locationInView.y - offset;
+                    r.size.height = MIN( max1, MAX( min1, locationInView.y - offset ) );
                 else
-                    r.size.width = locationInView.x - offset;
+                    r.size.width = MIN( max1, MAX( min1, locationInView.x - offset ) );
                 v.frame = r;
-                [self setNeedsLayout:YES];
-                [self layoutSubtreeIfNeeded];
+                [self _performLayoutAnimated:NO resetBasedOnVC2:NO];
             }
                 break;
                 
             case NSLeftMouseUp:
             {
                 [self setNeedsLayout:YES];
-                [self layoutSubtreeIfNeeded];
                 [self.window invalidateCursorRectsForView:self];
                 
                 pumpEvents = NO;
