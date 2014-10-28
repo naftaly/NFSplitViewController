@@ -35,10 +35,20 @@
     vc1.textField.hidden = YES;
     [self.splitViewController addChildViewController:vc1];
     
+    NFSplitViewController* sp2 = [[NFSplitViewController alloc] init];
+    sp2.vertical = YES;
+    
     TestViewController* vc2 = [[TestViewController alloc] init];
     vc2.backgroundColor = [NSColor whiteColor];
-    vc2.name = @"Detail";
-    [self.splitViewController addChildViewController:vc2];
+    vc2.name = @"Detail Top";
+    [sp2 addChildViewController:vc2];
+    
+    TestViewController* vc3 = [[TestViewController alloc] init];
+    vc3.backgroundColor = [NSColor whiteColor];
+    vc3.name = @"Detail Bottom";
+    [sp2 addChildViewController:vc3];
+    
+    [self.splitViewController addChildViewController:sp2];
 }
 
 - (void)applicationWillTerminate:(NSNotification *)aNotification {

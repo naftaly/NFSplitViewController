@@ -668,11 +668,12 @@
         </menu>
         <window title="SplitView" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" releasedWhenClosed="NO" animationBehavior="default" id="QvC-M9-y7g">
             <windowStyleMask key="styleMask" titled="YES" closable="YES" miniaturizable="YES" resizable="YES"/>
+            <windowCollectionBehavior key="collectionBehavior" fullScreenPrimary="YES"/>
             <windowPositionMask key="initialPositionMask" leftStrut="YES" rightStrut="YES" topStrut="YES" bottomStrut="YES"/>
-            <rect key="contentRect" x="335" y="390" width="480" height="360"/>
+            <rect key="contentRect" x="405" y="129" width="851" height="638"/>
             <rect key="screenRect" x="0.0" y="0.0" width="1680" height="1027"/>
             <view key="contentView" id="EiT-Mj-1SZ">
-                <rect key="frame" x="0.0" y="0.0" width="480" height="360"/>
+                <rect key="frame" x="0.0" y="0.0" width="851" height="638"/>
                 <autoresizingMask key="autoresizingMask"/>
             </view>
             <toolbar key="toolbar" implicitIdentifier="E2020D34-AC3E-4668-94C1-11B2C8EF24BC" autosavesConfiguration="NO" displayMode="iconAndLabel" sizeMode="regular" id="4RL-2g-mPP">
@@ -698,6 +699,7 @@
                     <toolbarItem reference="jEi-Lp-xNq"/>
                 </defaultToolbarItems>
             </toolbar>
+            <point key="canvasLocation" x="434.5" y="423"/>
         </window>
     </objects>
     <resources>
