@@ -35,3 +35,9 @@
 @property (nonatomic,readonly) NFSplitViewController* splitViewController;
 
 @end
+
+@interface NSView (AKSplitViewController)
+
+@property (nonatomic,readonly) NFSplitViewController* splitViewController;
+
+@end

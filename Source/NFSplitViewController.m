@@ -45,8 +45,32 @@
 
 - (NFSplitViewController*)splitViewController
 {
+    // is my mama a split view controller?
     if ( [self.parentViewController isKindOfClass:[NFSplitViewController class]] )
         return (NFSplitViewController*)self.parentViewController;
+    
+    // i'm a split view controller so use my parent or else my view will just return myself
+    if ( [self isKindOfClass:[NFSplitViewController class]] )
+        return self.view.superview.splitViewController;
+    
+    // ask my view to find it, i'm lazy
+    return self.view.splitViewController;
+}
+
+@end
+
+@implementation NSView (AKSplitViewController)
+
+- (NFSplitViewController*)splitViewController
+{
+    // find a parent split view from a view
+    NSView* v = self;
+    while ( v && ![v isKindOfClass:[NFSplitViewControllerView class]] )
+        v = v.superview;
+    
+    if ( [v isKindOfClass:[NFSplitViewControllerView class]] )
+        return ((NFSplitViewControllerView*)v).controller;
+    
     return nil;
 }
 
