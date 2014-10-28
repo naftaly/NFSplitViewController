@@ -14,17 +14,18 @@
 @property (nonatomic,assign) CGFloat vc2SizeBeforeCollpase;
 @property (nonatomic,strong) NSMutableIndexSet* collapsedIndexes;
 @property (nonatomic,weak) NFSplitViewController* controller;
+@property (nonatomic,getter=isVertical) BOOL vertical;
 
 @end
 
 @implementation NSViewController (NFSplitViewControllerView)
 
-- (CGFloat)minimumWidthInSplitViewController:(NFSplitViewController*)splitViewController
+- (CGFloat)minimumLengthInSplitViewController:(NFSplitViewController*)splitViewController
 {
     return 0;
 }
 
-- (CGFloat)maximumWidthInSplitViewController:(NFSplitViewController*)splitViewController
+- (CGFloat)maximumLengthInSplitViewController:(NFSplitViewController*)splitViewController
 {
     return MAXFLOAT;
 }
@@ -60,7 +61,16 @@
     NSUInteger          numController = self.controller.childViewControllers.count;
     NSViewController*   vc1 = numController > 0 ? self.controller.childViewControllers[0] : nil;
     
-    return CGRectMake( CGRectGetMaxX(vc1.view.frame)-2, 0, [NFSplitViewController dividerThickness]+4, self.bounds.size.height );
+    if ( self.vertical )
+    {
+        return CGRectMake( 0, CGRectGetMaxY(vc1.view.frame)-2, self.bounds.size.width, [NFSplitViewController dividerThickness]+4 );
+    }
+    else
+    {
+        return CGRectMake( CGRectGetMaxX(vc1.view.frame)-2, 0, [NFSplitViewController dividerThickness]+4, self.bounds.size.height );
+    }
+    
+    return CGRectZero;
 }
 
 - (void)mouseDown:(NSEvent *)theEvent
@@ -87,7 +97,7 @@
     }
     
     CGPoint locationInView = [self convertPoint:theEvent.locationInWindow fromView:nil];
-    CGFloat offsetX = locationInView.x - [self _splitterRect].origin.x;
+    CGFloat offset = self.vertical ? locationInView.y - [self _splitterRect].origin.y : locationInView.x - [self _splitterRect].origin.x;
     
     // do the event pump drag
     BOOL pumpEvents = YES;
@@ -102,7 +112,10 @@
                 locationInView = [self convertPoint:theEvent.locationInWindow fromView:nil];
                 NSView* v = [self.controller.childViewControllers[0] view];
                 CGRect r = v.frame;
-                r.size.width = locationInView.x - offsetX;
+                if ( self.vertical )
+                    r.size.height = locationInView.y - offset;
+                else
+                    r.size.width = locationInView.x - offset;
                 v.frame = r;
                 [self setNeedsLayout:YES];
                 [self layoutSubtreeIfNeeded];
@@ -131,21 +144,88 @@
 {
     [super resetCursorRects];
     
-    NSCursor* cursor = [NSCursor resizeLeftRightCursor];
+    NSCursor* cursor = self.vertical ? [NSCursor resizeUpDownCursor] : [NSCursor resizeLeftRightCursor];
     [cursor setOnMouseEntered:YES];
     
     [self addCursorRect: [self _splitterRect] cursor:cursor];
 }
 
-- (void)_performLayoutAnimated:(BOOL)animated resetBasedOnVC2:(BOOL)resetBasedOnVC2
+- (void)setVertical:(BOOL)vertical
+{
+    _vertical = vertical;
+    [self setNeedsLayout:YES];
+    [self.window invalidateCursorRectsForView:self];
+}
+
+- (void)_performVerticalLayoutAnimated:(BOOL)animated resetBasedOnVC2:(BOOL)resetBasedOnVC2
 {
     NSViewController*   vc1 = [self viewControllerAtIndex:0];
     NSViewController*   vc2 = [self viewControllerAtIndex:1];
     
-    CGFloat             min1 = vc1 ? [vc1 minimumWidthInSplitViewController:self.controller] : 0;
-    CGFloat             min2 = vc2 ? [vc2 minimumWidthInSplitViewController:self.controller] : 0;
-    CGFloat             max1 = vc1 ? [vc1 maximumWidthInSplitViewController:self.controller] : 0;
-    CGFloat             max2 = vc2 ? [vc2 maximumWidthInSplitViewController:self.controller] : 0;
+    CGFloat             min1 = vc1 ? [vc1 minimumLengthInSplitViewController:self.controller] : 0;
+    CGFloat             min2 = vc2 ? [vc2 minimumLengthInSplitViewController:self.controller] : 0;
+    CGFloat             max1 = vc1 ? [vc1 maximumLengthInSplitViewController:self.controller] : 0;
+    CGFloat             max2 = vc2 ? [vc2 maximumLengthInSplitViewController:self.controller] : 0;
+    
+    CGRect              frame1 = vc1.view.frame;
+    CGRect              frame2 = vc2.view.frame;
+    
+    BOOL                vc1IsCollapsed = [self isViewControllerCollapsedAtIndex:0];
+    BOOL                vc2IsCollapsed = [self isViewControllerCollapsedAtIndex:1];
+    
+    // set defaults
+    if ( frame1.size.height < min1 )
+        frame1.size.height = min1;
+    if ( frame1.size.height > max1 )
+        frame1.size.height = max1;
+    
+    if ( frame2.size.height < min2 )
+        frame2.size.height = min2;
+    if ( frame2.size.height > max2 )
+        frame2.size.height = max2;
+    
+    // setup frame 1
+    frame1.origin.x = 0;
+    frame1.origin.y = 0;
+    frame1.size.width = self.bounds.size.width;
+    if ( frame1.size.height > self.bounds.size.height - [NFSplitViewController dividerThickness] )
+        frame1.size.height = self.bounds.size.height - [NFSplitViewController dividerThickness];
+    
+    if ( vc2IsCollapsed )
+        frame1.size.height = self.bounds.size.height;
+    else if ( resetBasedOnVC2 && !vc1IsCollapsed )
+    {
+        frame1.size.height = self.bounds.size.height - [NFSplitViewController dividerThickness] - self.vc2SizeBeforeCollpase;
+    }
+    
+    // setup frame 2
+    frame2.origin.x = 0;
+    frame2.origin.y = vc1IsCollapsed ? 0 : CGRectGetMaxY(frame1) + [NFSplitViewController dividerThickness];
+    frame2.size.height = vc1IsCollapsed ? self.bounds.size.height : self.bounds.size.height - CGRectGetMinY(frame2);
+    frame2.size.width = self.bounds.size.width;
+    
+    // apply frames
+    if ( animated )
+    {
+        [[vc1.view animator] setFrame:frame1];
+        [[vc2.view animator] setFrame:frame2];
+    }
+    else
+    {
+        vc1.view.frame = frame1;
+        vc2.view.frame = frame2;
+    }
+}
+
+- (void)_performHorizontalLayoutAnimated:(BOOL)animated resetBasedOnVC2:(BOOL)resetBasedOnVC2
+{
+    NSViewController*   vc1 = [self viewControllerAtIndex:0];
+    NSViewController*   vc2 = [self viewControllerAtIndex:1];
+    
+    CGFloat             min1 = vc1 ? [vc1 minimumLengthInSplitViewController:self.controller] : 0;
+    CGFloat             min2 = vc2 ? [vc2 minimumLengthInSplitViewController:self.controller] : 0;
+    CGFloat             max1 = vc1 ? [vc1 maximumLengthInSplitViewController:self.controller] : 0;
+    CGFloat             max2 = vc2 ? [vc2 maximumLengthInSplitViewController:self.controller] : 0;
     
     CGRect              frame1 = vc1.view.frame;
     CGRect              frame2 = vc2.view.frame;
@@ -195,7 +275,14 @@
         vc1.view.frame = frame1;
         vc2.view.frame = frame2;
     }
-    
+}
+
+- (void)_performLayoutAnimated:(BOOL)animated resetBasedOnVC2:(BOOL)resetBasedOnVC2
+{
+    if ( self.isVertical )
+        [self _performVerticalLayoutAnimated:animated resetBasedOnVC2:resetBasedOnVC2];
+    else
+        [self _performHorizontalLayoutAnimated:animated resetBasedOnVC2:resetBasedOnVC2];
 }
 
 - (void)layout
@@ -241,7 +328,7 @@
         [self.collapsedIndexes addIndex:index];
         
         if ( index == 1 )
-            self.vc2SizeBeforeCollpase = vc.view.frame.size.width;
+            self.vc2SizeBeforeCollpase = self.isVertical ? vc.view.frame.size.height : vc.view.frame.size.width;
         
         if ( animated )
         {
@@ -276,6 +363,18 @@
 @end
 
 @implementation NFSplitViewController
+
+- (void)setVertical:(BOOL)vertical
+{
+    (void)self.view;
+    self.splitView.vertical = vertical;
+}
+
+- (BOOL)isVertical
+{
+    (void)self.view;
+    return self.splitView.isVertical;
+}
 
 + (CGFloat)dividerThickness
 {

@@ -26,6 +26,7 @@
     self.splitViewController = [[NFSplitViewController alloc] init];
     self.splitViewController.view.autoresizingMask = NSViewWidthSizable | NSViewHeightSizable;
     self.splitViewController.view.frame = contentView.bounds;
+    self.splitViewController.vertical = NO;
     [contentView addSubview:self.splitViewController.view];
     
     TestViewController* vc1 = [[TestViewController alloc] init];
@@ -47,6 +48,11 @@
 - (IBAction)collapseSplitView:(id)sender
 {
     [self.splitViewController collapseViewControllerAtIndex:0 animated:YES];
+}
+
+- (IBAction)toggleOrientation:(id)sender
+{
+    self.splitViewController.vertical = !self.splitViewController.vertical;
 }
 
 @end

@@ -53,12 +53,12 @@
     self.textField.stringValue = _name ? _name : @"";
 }
 
-- (CGFloat)minimumWidthInSplitViewController:(NFSplitViewController*)splitViewController
+- (CGFloat)minimumLengthInSplitViewController:(NFSplitViewController*)splitViewController
 {
     return 100;
 }
 
-- (CGFloat)maximumWidthInSplitViewController:(NFSplitViewController *)splitViewController
+- (CGFloat)maximumLengthInSplitViewController:(NFSplitViewController *)splitViewController
 {
     return 300;
 }

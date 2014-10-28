@@ -13,6 +13,7 @@
 - (void)collapseViewControllerAtIndex:(NSUInteger)index animated:(BOOL)animated;
 - (BOOL)isViewControllerCollapsedAtIndex:(NSUInteger)index;
 
+@property (nonatomic,getter=isVertical) BOOL vertical;
 @property (nonatomic,strong) NSColor* splitterColor;
 
 + (CGFloat)dividerThickness;
@@ -23,8 +24,8 @@
 
 @interface NSViewController (AKSplitViewController)
 
-- (CGFloat)minimumWidthInSplitViewController:(NFSplitViewController*)splitViewController;
-- (CGFloat)maximumWidthInSplitViewController:(NFSplitViewController*)splitViewController;
+- (CGFloat)minimumLengthInSplitViewController:(NFSplitViewController*)splitViewController;
+- (CGFloat)maximumLengthInSplitViewController:(NFSplitViewController*)splitViewController;
 - (BOOL)canCollapseInSplitViewController:(NFSplitViewController*)splitViewController;
 
 @property (nonatomic,readonly) NFSplitViewController* splitViewController;
