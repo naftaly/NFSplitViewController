@@ -10,15 +10,19 @@
 
 @interface NFSplitViewController : NSViewController
 
-- (void)collapseViewControllerAtIndex:(NSUInteger)index animated:(BOOL)animated;
+- (void)collapseViewControllerAtIndex:(NSUInteger)index animated:(BOOL)animated completion:(void (^)(void))completion;
 - (BOOL)isViewControllerCollapsedAtIndex:(NSUInteger)index;
 
 @property (nonatomic,getter=isVertical) BOOL vertical;
+- (void)setVertical:(BOOL)vertical animated:(BOOL)animated completion:(void (^)(void))completion;
+
 @property (nonatomic,strong) NSColor* splitterColor;
 
 + (CGFloat)dividerThickness;
 
 - (void)transitionFromViewControllerAtIndex:(NSUInteger)index toViewController:(NSViewController*)viewController;
+
+- (void)resizeChildViewcontrollers;
 
 @end
 

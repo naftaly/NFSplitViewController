@@ -57,12 +57,12 @@
 
 - (IBAction)collapseSplitView:(id)sender
 {
-    [self.splitViewController collapseViewControllerAtIndex:0 animated:YES];
+    [self.splitViewController collapseViewControllerAtIndex:0 animated:YES completion:nil];
 }
 
 - (IBAction)toggleOrientation:(id)sender
 {
-    self.splitViewController.vertical = !self.splitViewController.vertical;
+    [self.splitViewController setVertical:!self.splitViewController.isVertical animated:YES completion:nil];
 }
 
 @end

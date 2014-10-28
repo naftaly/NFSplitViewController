@@ -18,6 +18,14 @@
 
 @end
 
+@interface NFSplitViewController ()
+
+@property (nonatomic,assign) BOOL isInTransition;
+@property (nonatomic,strong) NFSplitViewControllerView* splitView;
+@property (nonatomic,assign) BOOL isInAnimation;
+
+@end
+
 @implementation NSViewController (NFSplitViewControllerView)
 
 - (CGFloat)minimumLengthInSplitViewController:(NFSplitViewController*)splitViewController
@@ -38,7 +46,7 @@
 - (NFSplitViewController*)splitViewController
 {
     if ( [self.parentViewController isKindOfClass:[NFSplitViewController class]] )
-        return (NFSplitViewController*)self.splitViewController;
+        return (NFSplitViewController*)self.parentViewController;
     return nil;
 }
 
@@ -158,8 +166,37 @@
     [self.window invalidateCursorRectsForView:self];
 }
 
+- (void)setVertical:(BOOL)vertical animated:(BOOL)animated completion:(void (^)(void))completion
+{
+    _vertical = vertical;
+    
+    if ( animated )
+    {
+        __weak typeof(self)weakMe = self;
+        [NSAnimationContext runAnimationGroup:^(NSAnimationContext *context) {
+            typeof(self)me = weakMe;
+            [NSAnimationContext currentContext].allowsImplicitAnimation = YES;
+            [me _performLayoutAnimated:YES resetBasedOnVC2:NO];
+        } completionHandler:^{
+            typeof(self)me = weakMe;
+            [me.window invalidateCursorRectsForView:me];
+            if ( completion )
+                completion();
+        }];
+    }
+    else
+    {
+        [self setNeedsLayout:YES];
+        [self.window invalidateCursorRectsForView:self];
+        if ( completion )
+            completion();
+    }
+}
+
 - (void)_performVerticalLayoutAnimated:(BOOL)animated resetBasedOnVC2:(BOOL)resetBasedOnVC2
 {
+    animated = animated || self.controller.splitViewController.isInAnimation;
+    
     NSViewController*   vc1 = [self viewControllerAtIndex:0];
     NSViewController*   vc2 = [self viewControllerAtIndex:1];
     
@@ -220,6 +257,8 @@
 
 - (void)_performHorizontalLayoutAnimated:(BOOL)animated resetBasedOnVC2:(BOOL)resetBasedOnVC2
 {
+    animated = animated || self.controller.splitViewController.isInAnimation;
+    
     NSViewController*   vc1 = [self viewControllerAtIndex:0];
     NSViewController*   vc2 = [self viewControllerAtIndex:1];
     
@@ -286,6 +325,11 @@
         [self _performHorizontalLayoutAnimated:animated resetBasedOnVC2:resetBasedOnVC2];
 }
 
+- (void)resizeChildViewcontrollers
+{
+    [self _performLayoutAnimated:NO resetBasedOnVC2:NO];
+}
+
 - (void)layout
 {
     [self _performLayoutAnimated:NO resetBasedOnVC2:NO];
@@ -297,7 +341,7 @@
     return self.controller.childViewControllers.count > index ? self.controller.childViewControllers[index] : nil;
 }
 
-- (void)collapseViewControllerAtIndex:(NSUInteger)index animated:(BOOL)animated
+- (void)collapseViewControllerAtIndex:(NSUInteger)index animated:(BOOL)animated completion:(void (^)(void))completion
 {
     NSViewController* vc = [self viewControllerAtIndex:index];
     if ( !vc || ![vc canCollapseInSplitViewController:self.controller] )
@@ -311,16 +355,24 @@
         
         if ( animated )
         {
+            __weak typeof(self)weakMe = self;
+            self.controller.isInAnimation = YES;
             [NSAnimationContext runAnimationGroup:^(NSAnimationContext *context) {
-                [self _performLayoutAnimated:YES resetBasedOnVC2: index == 1];
+                typeof(self)me = weakMe;
+                [NSAnimationContext currentContext].allowsImplicitAnimation = YES;
+                [me _performLayoutAnimated:YES resetBasedOnVC2: index == 1];
+                me.controller.isInAnimation = NO;
             } completionHandler:^{
-                
+                if ( completion )
+                    completion();
             }];
         }
         else
         {
             [self setNeedsLayout:YES];
             [self layoutSubtreeIfNeeded];
+            if ( completion )
+                completion();
         }
         
     }
@@ -333,10 +385,17 @@
         
         if ( animated )
         {
+            __weak typeof(self)weakMe = self;
+            self.controller.isInAnimation = YES;
             [NSAnimationContext runAnimationGroup:^(NSAnimationContext *context) {
-                [self _performLayoutAnimated:YES resetBasedOnVC2:NO];
+                typeof(self)me = weakMe;
+                [NSAnimationContext currentContext].allowsImplicitAnimation = YES;
+                [me _performLayoutAnimated:YES resetBasedOnVC2:NO];
+                self.controller.isInAnimation = NO;
             } completionHandler:^{
                 vc.view.hidden = YES;
+                if ( completion )
+                    completion();
             }];
         }
         else
@@ -344,6 +403,8 @@
             vc.view.hidden = NO;
             [self setNeedsLayout:YES];
             [self layoutSubtreeIfNeeded];
+            if ( completion )
+                completion();
         }
         
     }
@@ -356,19 +417,17 @@
 
 @end
 
-@interface NFSplitViewController ()
-
-@property (nonatomic,assign) BOOL isInTransition;
-@property (nonatomic,strong) NFSplitViewControllerView* splitView;
-
-@end
-
 @implementation NFSplitViewController
 
 - (void)setVertical:(BOOL)vertical
 {
+    [self setVertical:vertical animated:NO completion:nil];
+}
+
+- (void)setVertical:(BOOL)vertical animated:(BOOL)animated completion:(void (^)(void))completion
+{
     (void)self.view;
-    self.splitView.vertical = vertical;
+    [self.splitView setVertical:vertical animated:animated completion:completion];
 }
 
 - (BOOL)isVertical
@@ -425,9 +484,9 @@
     return self.splitView.backgroundColor;
 }
 
-- (void)collapseViewControllerAtIndex:(NSUInteger)index animated:(BOOL)animated
+- (void)collapseViewControllerAtIndex:(NSUInteger)index animated:(BOOL)animated completion:(void (^)(void))completion
 {
-    [self.splitView collapseViewControllerAtIndex:index animated:animated];
+    [self.splitView collapseViewControllerAtIndex:index animated:animated completion:completion];
 }
 
 - (BOOL)isViewControllerCollapsedAtIndex:(NSUInteger)index
@@ -496,6 +555,11 @@
     NSView* sub = self.splitView.subviews[index];
     [sub removeFromSuperview];
     [self.view.window invalidateCursorRectsForView:self.splitView];
+}
+
+- (void)resizeChildViewcontrollers
+{
+    [self.splitView resizeChildViewcontrollers];
 }
 
 @end
