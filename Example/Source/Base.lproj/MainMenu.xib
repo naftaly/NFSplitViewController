@@ -683,12 +683,12 @@
                     <toolbarItem implicitItemIdentifier="NSToolbarPrintItem" id="fOk-RU-iFs"/>
                     <toolbarItem implicitItemIdentifier="NSToolbarSpaceItem" id="6S0-wO-CJP"/>
                     <toolbarItem implicitItemIdentifier="NSToolbarFlexibleSpaceItem" id="CX5-OY-6XP"/>
-                    <toolbarItem implicitItemIdentifier="C52273C6-67BA-4430-A21F-A8AE8201EE47" label="Collapse" paletteLabel="Collapse" tag="-1" image="NSColumnViewTemplate" id="2w7-PX-46h">
+                    <toolbarItem implicitItemIdentifier="C52273C6-67BA-4430-A21F-A8AE8201EE47" label="Collapse" paletteLabel="Collapse" tag="-1" id="2w7-PX-46h">
                         <connections>
                             <action selector="collapseSplitView:" target="Voe-Tx-rLC" id="j2o-kp-esL"/>
                         </connections>
                     </toolbarItem>
-                    <toolbarItem implicitItemIdentifier="2A493267-8DF2-437B-9CB7-F8791BC990CD" label="Orientation" paletteLabel="Orientation" tag="-1" image="NSCaution" id="jEi-Lp-xNq">
+                    <toolbarItem implicitItemIdentifier="2A493267-8DF2-437B-9CB7-F8791BC990CD" label="Orientation" paletteLabel="Orientation" tag="-1" id="jEi-Lp-xNq">
                         <connections>
                             <action selector="toggleOrientation:" target="Voe-Tx-rLC" id="pIl-WF-uLa"/>
                         </connections>
@@ -702,8 +702,4 @@
             <point key="canvasLocation" x="434.5" y="423"/>
         </window>
     </objects>
-    <resources>
-        <image name="NSCaution" width="32" height="32"/>
-        <image name="NSColumnViewTemplate" width="16" height="10"/>
-    </resources>
 </document>

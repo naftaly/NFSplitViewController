@@ -27,6 +27,9 @@
 {
     [super viewDidLoad];
     
+    self.borderColor = [NSColor redColor];
+    self.borderWidth = 1;
+    
     self.textField = [[NSTextField alloc] initWithFrame:CGRectInset(self.view.bounds, 10, 10)];
     self.textField.layer.borderWidth = 1;
     self.textField.layer.borderColor = [NSColor blackColor].CGColor;
@@ -45,6 +48,26 @@
 - (NSColor*)backgroundColor
 {
     return ((NFLayerBackedView*)self.view).backgroundColor;
+}
+
+- (void)setBorderColor:(NSColor *)borderColor
+{
+    ((NFLayerBackedView*)self.view).borderColor = borderColor;
+}
+
+- (NSColor*)borderColor
+{
+    return ((NFLayerBackedView*)self.view).borderColor;
+}
+
+- (void)setBorderWidth:(CGFloat)borderWidth
+{
+    ((NFLayerBackedView*)self.view).borderWidth = borderWidth;
+}
+
+- (CGFloat)borderWidth
+{
+    return ((NFLayerBackedView*)self.view).borderWidth;
 }
 
 - (void)setName:(NSString *)name

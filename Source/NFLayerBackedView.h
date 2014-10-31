@@ -12,4 +12,7 @@
 
 @property (nonatomic,strong) NSColor* backgroundColor;
 
+@property (nonatomic,strong) NSColor* borderColor;
+@property (nonatomic,assign) CGFloat borderWidth;
+
 @end
