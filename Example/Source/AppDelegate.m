@@ -30,9 +30,8 @@
     [contentView addSubview:self.splitViewController.view];
     
     TestViewController* vc1 = [[TestViewController alloc] init];
-    vc1.backgroundColor = [NSColor colorWithDeviceRed:246.0/255.0 green:246.0/255.0 blue:246.0/255.0 alpha:1];
-    vc1.name = @"Source";
-    vc1.textField.hidden = YES;
+    vc1.backgroundColor = [NSColor whiteColor];
+    vc1.name = @"Master";
     [self.splitViewController addChildViewController:vc1];
     
     NFSplitViewController* sp2 = [[NFSplitViewController alloc] init];
@@ -63,6 +62,8 @@
 
 - (IBAction)toggleOrientation:(id)sender
 {
+    NFSplitViewController* detailController = self.splitViewController.childViewControllers[1];
+    [detailController setVertical:!detailController.isVertical animated:YES completion:nil];
     [self.splitViewController setVertical:!self.splitViewController.isVertical animated:YES completion:nil];
 }
 
