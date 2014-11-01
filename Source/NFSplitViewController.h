@@ -8,6 +8,9 @@
 
 #import <Cocoa/Cocoa.h>
 
+extern NSString* const NFSplitViewControllerWillBeginLiveResizeNotification;
+extern NSString* const NFSplitViewControllerDidFinishLiveResizeNotification;
+
 @interface NFSplitViewController : NSViewController
 
 - (void)collapseViewControllerAtIndex:(NSUInteger)index animated:(BOOL)animated completion:(void (^)(void))completion;
@@ -18,6 +21,8 @@
 
 @property (nonatomic,strong) NSColor* dividerColor;
 @property (nonatomic,assign) CGFloat dividerThickness;
+
+@property (nonatomic,readonly) BOOL isResizingWithDivider;
 
 - (void)transitionFromViewControllerAtIndex:(NSUInteger)index toViewController:(NSViewController*)viewController;
 

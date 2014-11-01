@@ -9,6 +9,9 @@
 #import "NFSplitViewController.h"
 #import "NFLayerBackedView.h"
 
+NSString* const NFSplitViewControllerWillBeginLiveResizeNotification = @"NFSplitViewControllerWillBeginLiveResizeNotification";
+NSString* const NFSplitViewControllerDidFinishLiveResizeNotification = @"NFSplitViewControllerDidFinishLiveResizeNotification";
+
 @interface NFSplitViewControllerView : NFLayerBackedView
 
 @property (nonatomic,assign) CGFloat vc2SizeBeforeCollpase;
@@ -24,6 +27,7 @@
 @property (nonatomic,assign) BOOL isInTransition;
 @property (nonatomic,strong) NFSplitViewControllerView* splitView;
 @property (nonatomic,assign) BOOL isInAnimation;
+@property (nonatomic,assign) BOOL isResizingWithDivider;
 
 @end
 
@@ -133,6 +137,10 @@
     CGPoint locationInView = [self convertPoint:theEvent.locationInWindow fromView:nil];
     CGFloat offset = self.vertical ? locationInView.y - [self _splitterRect].origin.y : locationInView.x - [self _splitterRect].origin.x;
     
+    [[NSNotificationCenter defaultCenter] postNotificationName:NFSplitViewControllerWillBeginLiveResizeNotification object:self.controller];
+    
+    self.controller.isResizingWithDivider = YES;
+    
     // do the event pump drag
     BOOL pumpEvents = YES;
     while ( pumpEvents )
@@ -154,6 +162,42 @@
                 else
                     r.size.width = MIN( max1, MAX( min1, locationInView.x - offset ) );
                 v.frame = r;
+                
+                NSCursor* cursor = nil;
+                
+                if ( self.isVertical )
+                {
+                    if ( r.size.height <= min1 )
+                    {
+                        cursor = [NSCursor resizeDownCursor];
+                    }
+                    else if ( r.size.height >= max1 )
+                    {
+                        cursor = [NSCursor resizeUpCursor];
+                    }
+                    else
+                    {
+                        cursor = [NSCursor resizeUpDownCursor];
+                    }
+                }
+                else
+                {
+                    if ( r.size.width <= min1 )
+                    {
+                        cursor = [NSCursor resizeRightCursor];
+                    }
+                    else if ( r.size.width >= max1 )
+                    {
+                        cursor = [NSCursor resizeLeftCursor];
+                    }
+                    else
+                    {
+                        cursor = [NSCursor resizeLeftRightCursor];
+                    }
+                }
+
+                [cursor set];
+                
                 [self _performLayoutAnimated:NO resetBasedOnVC2:NO];
             }
                 break;
@@ -162,6 +206,8 @@
             {
                 [self setNeedsLayout:YES];
                 [self.window invalidateCursorRectsForView:self];
+                
+                [[NSCursor currentSystemCursor] set];
                 
                 pumpEvents = NO;
             }
@@ -173,6 +219,11 @@
                 break;
         }
     }
+    
+    self.controller.isResizingWithDivider = YES;
+    
+    [[NSNotificationCenter defaultCenter] postNotificationName:NFSplitViewControllerDidFinishLiveResizeNotification object:self.controller];
+    
 }
 
 - (void)resetCursorRects
