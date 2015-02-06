@@ -220,7 +220,7 @@ NSString* const NFSplitViewControllerDidFinishLiveResizeNotification = @"NFSplit
         }
     }
     
-    self.controller.isResizingWithDivider = YES;
+    self.controller.isResizingWithDivider = NO;
     
     [[NSNotificationCenter defaultCenter] postNotificationName:NFSplitViewControllerDidFinishLiveResizeNotification object:self.controller];
     
